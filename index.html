@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentiment Analysis</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        input, button {
+            padding: 10px;
+            margin: 10px;
+        }
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Sentiment Analysis</h1>
+    
+    <form id="sentimentForm">
+        <input type="text" id="textInput" placeholder="Enter text here" required>
+        <button type="submit">Analyze</button>
+    </form>
+    <div id="result"></div>
+    <script>
+        document.getElementById("sentimentForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+            const text = document.getElementById("textInput").value;
+            if (!text) {
+                document.getElementById("result").innerText = "Please enter some text.";
+                return;
+            }
+            const response = await fetch("/analyze-sentiment/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ text: text }) 
+            });
+            const data = await response.json();
+            if (data.error) {
+                document.getElementById("result").innerText = "Error: " + data.error;
+            } 
+            else {
+                    let resultHTML = "<h3>Predicted Sentiments:</h3><ul>";
+                    for (let i = 0; i < data.labels.length; i++) {
+                        resultHTML += `<li>${data.labels[i]}: <b>${Math.round(data.scores[i] * 100)}%</b></li>`;
+                    }
+                    resultHTML += "</ul>";
+                    document.getElementById("result").innerHTML = resultHTML;
+                 }   
+        });
+    </script>
+
+</body>
+</html>
